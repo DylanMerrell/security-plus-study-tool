@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security+ Study Tool</title>
+<style>
+:root{
+  --bg:#0f172a;
+  --panel:#161f38;
+  --panel2:#1c2743;
+  --border:#2c3958;
+  --text:#e8ecf7;
+  --muted:#95a1c2;
+  --accent:#6c8cff;
+  --accent2:#8f6cff;
+  --good:#3ecf8e;
+  --bad:#ff6b6b;
+  --ok:#f5c344;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:linear-gradient(180deg,#0b1120,#0f172a 40%);
+  color:var(--text);
+  min-height:100vh;
+}
+.wrap{max-width:900px;margin:0 auto;padding:24px 16px 60px;}
+header.top{text-align:center;margin-bottom:20px;}
+header.top h1{font-size:1.6rem;margin:0 0 4px;}
+header.top p{color:var(--muted);margin:0;font-size:0.95rem;}
+
+.filterbar{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px 16px;
+  margin-bottom:18px;
+}
+.filterbar .filterlabel{font-size:0.8rem;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between;}
+#chapterFilter{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{
+  border:1px solid var(--border);
+  background:var(--panel2);
+  color:var(--text);
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:0.82rem;
+  cursor:pointer;
+  transition:all .15s ease;
+}
+.chip:hover{border-color:var(--accent);}
+.chip.on{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent;color:#fff;}
+.chip.chipctl{background:transparent;border-style:dashed;}
+
+.tabs{display:flex;gap:6px;margin-bottom:18px;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:6px;}
+.tabbtn{
+  flex:1;
+  background:transparent;
+  border:none;
+  color:var(--muted);
+  padding:10px 8px;
+  border-radius:10px;
+  font-size:0.88rem;
+  font-weight:600;
+  cursor:pointer;
+  transition:all .15s ease;
+}
+.tabbtn.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
+.tabbtn:hover:not(.active){color:var(--text);background:var(--panel2);}
+
+.panel{display:none;}
+.panel.active{display:block;}
+
+.card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:22px;
+  margin-bottom:16px;
+}
+.setupcard h2{margin-top:0;}
+.muted{color:var(--muted);}
+.small{font-size:0.85rem;}
+.center{text-align:center;}
+
+.setuprow{display:flex;gap:16px;flex-wrap:wrap;margin:14px 0;align-items:flex-end;}
+.setuprow label{display:flex;flex-direction:column;gap:6px;font-size:0.85rem;color:var(--muted);}
+select{
+  background:var(--panel2);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:8px 10px;
+  font-size:0.9rem;
+}
+
+.btn{
+  background:var(--panel2);
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:10px 18px;
+  border-radius:10px;
+  font-size:0.9rem;
+  font-weight:600;
+  cursor:pointer;
+  transition:all .15s ease;
+}
+.btn:hover:not(:disabled){border-color:var(--accent);}
+.btn:disabled{opacity:0.4;cursor:not-allowed;}
+.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent;color:#fff;}
+
+.quizhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:0.85rem;}
+.tag{
+  background:var(--panel2);
+  border:1px solid var(--border);
+  padding:3px 10px;
+  border-radius:999px;
+  font-size:0.78rem;
+  color:var(--accent);
+}
+.progressbar{height:6px;background:var(--panel2);border-radius:999px;overflow:hidden;margin-bottom:18px;}
+.progressfill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .2s ease;}
+
+.qprompt{font-size:1.15rem;line-height:1.5;margin:0 0 18px;}
+.qprompt.small{font-size:1rem;}
+
+.choices{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;}
+.choice{
+  text-align:left;
+  background:var(--panel2);
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:12px 16px;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:0.95rem;
+  transition:all .15s ease;
+}
+.choice:hover{border-color:var(--accent);}
+.choice.selected{border-color:var(--accent);background:#25325a;}
+.choice.correct{border-color:var(--good);background:rgba(62,207,142,0.15);}
+.choice.incorrect{border-color:var(--bad);background:rgba(255,107,107,0.15);}
+.choice .checkmark{margin-right:4px;}
+
+.reviewchoice{
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  margin-bottom:6px;
+  font-size:0.88rem;
+  background:var(--panel2);
+}
+.reviewchoice.correct{border-color:var(--good);background:rgba(62,207,142,0.15);}
+.reviewchoice.incorrect{border-color:var(--bad);background:rgba(255,107,107,0.15);}
+.reviewitem{border-top:1px solid var(--border);padding-top:14px;margin-top:14px;}
+.reviewitem:first-child{border-top:none;margin-top:0;padding-top:0;}
+
+.explainbox{
+  border-radius:10px;
+  padding:10px 14px;
+  font-size:0.88rem;
+  line-height:1.5;
+  margin-top:4px;
+}
+.explainbox-good{background:rgba(62,207,142,0.08);border:1px solid rgba(62,207,142,0.35);color:var(--text);}
+.explainbox-bad{background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.35);color:var(--text);}
+.explainlabel{color:var(--muted);font-weight:700;font-size:0.82rem;text-transform:uppercase;letter-spacing:0.02em;}
+
+.quiznav{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;}
+
+.scoreBig{font-size:2.4rem;font-weight:800;text-align:center;margin:10px 0 6px;}
+.scoreBig.good{color:var(--good);}
+.scoreBig.ok{color:var(--ok);}
+.scoreBig.bad{color:var(--bad);}
+
+.good{color:var(--good);font-weight:700;}
+.bad{color:var(--bad);font-weight:700;}
+.ok{color:var(--ok);font-weight:700;}
+
+.flashcard{
+  min-height:220px;
+  background:linear-gradient(135deg,#1d2a4d,#26305a);
+  border:1px solid var(--border);
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  margin-bottom:10px;
+  padding:24px;
+  text-align:center;
+  user-select:none;
+}
+.flashface{font-size:1.3rem;line-height:1.5;}
+.flashback{font-size:1.05rem;color:#dfe6ff;}
+
+.matchgrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:10px;
+  margin-bottom:16px;
+}
+.matchtile{
+  background:var(--panel2);
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:14px 10px;
+  border-radius:10px;
+  font-size:0.82rem;
+  cursor:pointer;
+  min-height:70px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  transition:all .15s ease;
+}
+.matchtile.term{border-left:3px solid var(--accent);}
+.matchtile.def{border-left:3px solid var(--accent2);}
+.matchtile.picked{border-color:var(--accent);background:#25325a;}
+.matchtile.matched{opacity:0;pointer-events:none;}
+
+footer.foot{text-align:center;color:var(--muted);font-size:0.78rem;margin-top:24px;}
+
+.glossarysearch{
+  width:100%;
+  background:var(--panel2);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px 14px;
+  font-size:0.9rem;
+  margin:14px 0 18px;
+}
+.glossarysearch:focus{outline:none;border-color:var(--accent);}
+.glossarych{
+  font-size:0.85rem;
+  color:var(--accent);
+  text-transform:uppercase;
+  letter-spacing:0.03em;
+  margin:20px 0 8px;
+  border-bottom:1px solid var(--border);
+  padding-bottom:6px;
+}
+.glossarych:first-child{margin-top:0;}
+.glossaryrow{
+  padding:10px 0;
+  border-bottom:1px solid var(--border);
+}
+.glossaryrow:last-child{border-bottom:none;}
+.glossaryterm{font-weight:700;font-size:0.95rem;margin-bottom:3px;}
+.glossarydef{font-size:0.88rem;line-height:1.5;}
+
+.gtools{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;}
+.gch{border:1px solid var(--border);border-radius:12px;margin:0 0 12px;background:var(--panel2);}
+.gch>summary{cursor:pointer;padding:12px 14px;font-weight:700;font-size:0.95rem;list-style:none;display:flex;justify-content:space-between;gap:10px;align-items:center;}
+.gch>summary::-webkit-details-marker{display:none;}
+.gch>summary::before{content:"\25B8";color:var(--accent);margin-right:8px;}
+.gch[open]>summary::before{content:"\25BE";}
+.gch>summary .gmeta{font-weight:400;font-size:0.78rem;color:var(--muted);margin-left:auto;text-align:right;}
+.gbody{padding:0 14px 14px;}
+.gsec{font-size:0.8rem;color:var(--accent);text-transform:uppercase;letter-spacing:0.04em;margin:18px 0 6px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+.gsec .gcount{color:var(--muted);text-transform:none;letter-spacing:0;font-weight:400;margin-left:6px;}
+.gdef.veiled{filter:blur(6px);cursor:pointer;user-select:none;}
+.gcontrast{margin-top:16px;padding:12px 14px;border:1px solid rgba(245,195,68,0.35);background:rgba(245,195,68,0.07);border-radius:10px;font-size:0.86rem;line-height:1.5;}
+.gcontrast strong{display:block;margin-bottom:6px;color:var(--ok);}
+.gcontrast ul{margin:0;padding-left:18px;}
+.gcontrast li{margin-bottom:4px;}
+
+.accrow{margin-bottom:14px;}
+.accrow:last-child{margin-bottom:0;}
+.accrowhead{display:flex;justify-content:space-between;font-size:0.9rem;margin-bottom:4px;}
+.accbar{height:8px;background:var(--panel2);border-radius:999px;overflow:hidden;margin-bottom:4px;}
+.accbarfill{height:100%;border-radius:999px;}
+.accbarfill.good{background:var(--good);}
+.accbarfill.ok{background:var(--ok);}
+.accbarfill.bad{background:var(--bad);}
+
+@media (max-width:600px){
+  .tabbtn{font-size:0.72rem;padding:8px 3px;}
+  .scoreBig{font-size:1.9rem;}
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>CompTIA Security+ Study Tool</h1>
+    <p>Practice Test, Flashcards, Learn Mode, Match, and Glossary &mdash; sample build with one chapter (Secure Protocols and Applications)</p>
+  </header>
+
+  <div class="filterbar">
+    <div class="filterlabel">
+      <span>Filter by chapter</span>
+      <span id="filterCount" class="muted"></span>
+    </div>
+    <div id="chapterFilter"></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tabbtn active" data-tab="quiz">Practice Test</button>
+    <button class="tabbtn" data-tab="flash">Flashcards</button>
+    <button class="tabbtn" data-tab="learn">Learn</button>
+    <button class="tabbtn" data-tab="match">Match</button>
+    <button class="tabbtn" data-tab="glossary">Glossary</button>
+  </div>
+
+  <div class="panel active" id="panel-quiz"></div>
+  <div class="panel" id="panel-flash"></div>
+  <div class="panel" id="panel-learn"></div>
+  <div class="panel" id="panel-match"></div>
+  <div class="panel" id="panel-glossary"></div>
+
+  <footer class="foot">Sample content written in my own words for study practice; not affiliated with or endorsed by CompTIA. Progress (flashcard "known" status, Learn mastery, and Match best times) is saved locally in this browser.</footer>
+</div>
+
+<script>
+window.__CHAPTERS__ = [{"id": 11, "title": "Secure Protocols and Applications", "terms": [["DNS (Domain Name System)", "Name resolution service that uses TCP/UDP port 53 to translate hostnames to IP addresses.", "DNS Security"], ["Domain Hijacking", "A DNS threat in which an attacker takes control of a domain name registration or its DNS records.", "DNS Security"], ["URL Redirection", "A DNS-related threat that sends users who request a legitimate site to a different, malicious destination.", "DNS Security"], ["DNS Cache Poisoning", "Inserting false entries into a DNS cache or resolver so that names resolve to attacker-chosen IP addresses (also called DNS poisoning).", "DNS Security"], ["DNSSEC (Domain Name System Security Extensions)", "DNS extensions that use digital signatures and certificates for DNS zones so responses can be verified as authentic.", "DNS Security"], ["SNMP (Simple Network Management Protocol)", "Protocol for managing and monitoring network devices; uses UDP port 161 (queries) and 162 (traps), with versions 1, 2, and 3 (v3 is the secure one).", "Secure Protocols and Ports"], ["SSH (Secure Shell)", "Encrypted remote administration protocol that uses TCP port 22.", "Secure Protocols and Ports"], ["FTPS (FTP over SSL)", "Secured File Transfer Protocol that wraps FTP in SSL/TLS; uses TCP port 990.", "Secure Protocols and Ports"], ["SFTP (SSH FTP)", "File transfer that runs over an SSH connection; uses TCP port 22.", "Secure Protocols and Ports"], ["SRTP (Secure Real-Time Transport Protocol)", "Secured version of RTP for voice and video streams; uses UDP port 5004.", "Secure Protocols and Ports"], ["Hiding the Web Server IP Address", "Protecting a web app by concealing the true web server IP using load balancing, reverse proxying, or NAT.", "Securing Web Applications"], ["HTTPS", "HTTP secured with TLS; enabled on the web server, requires a server PKI certificate, and uses TCP port 443 instead of 80.", "Securing Web Applications"], ["TLS Version for Web Apps", "Web servers should use TLS version 1.2 or higher.", "Securing Web Applications"], ["LDAPS (LDAP over SSL)", "Secured directory service access protocol supported by Microsoft Active Directory; requires a server PKI certificate and uses TCP port 636 instead of 389.", "Securing Web Applications"], ["SMTP (Simple Mail Transfer Protocol)", "E-mail transfer protocol that moves messages between mail servers.", "E-mail Security"], ["Domain Reputation", "A measure that determines whether mail from a domain will be accepted by other SMTP hosts.", "E-mail Security"], ["S/MIME (Secure/Multipurpose Internet Mail Extensions)", "Standard used to encrypt and digitally sign e-mail messages; requires a client PKI certificate.", "E-mail Security"], ["POP (Post Office Protocol)", "Client e-mail retrieval protocol.", "E-mail Security"], ["IMAP (Internet Message Access Protocol)", "Client e-mail retrieval protocol.", "E-mail Security"], ["Securing E-mail Protocols", "SMTP, POP, and IMAP can each be secured with a server PKI certificate.", "E-mail Security"], ["CSRF (Cross-Site Request Forgery)", "Attack that targets users and unchanging session tokens to hijack an authenticated session between a client and a server.", "Request Forgery and Cross-Site Attacks"], ["SSRF (Server-Side Request Forgery)", "Attack that targets web servers, tricking the server into making HTTP requests to other services.", "Request Forgery and Cross-Site Attacks"], ["Request Forgery Mitigation", "Harden client devices and use a web application firewall (WAF).", "Request Forgery and Cross-Site Attacks"], ["XSS (Cross-Site Scripting)", "Attack in which malicious code (commonly JavaScript) is injected into a vulnerable website and then executed in visitors' browsers.", "Request Forgery and Cross-Site Attacks"], ["Untrusted Input", "The principle that all user input must be treated as untrusted; XSS starts with a web app that does not validate or sanitize it.", "Input Handling and Injection"], ["Injection Attack", "Malicious user input accepted by a web app; types include SQL, LDAP, and XML injection. Mitigated by sanitizing all user input.", "Input Handling and Injection"], ["Secure Coding", "Software development security best practices: input validation, secure web browser cookies, HTTP headers, code signing, and trusted components and APIs.", "Secure Coding and Development"], ["Input Validation", "Checking and sanitizing user input before the application uses it.", "Input Handling and Injection"], ["Code Signing", "Digitally signing code so users can verify its source and that it has not been altered.", "Secure Coding and Development"], ["SDLC (Software Development Life Cycle)", "The stages of building software: planning, defining, designing, building, testing, and deployment.", "Secure Coding and Development"], ["CI/CD (Continuous Integration and Continuous Delivery)", "Automating developer code changes, testing for quality assurance, and sending update notifications for code version control. Security issue: attackers could inject changes into the update.", "Secure Coding and Development"], ["Infrastructure as Code (IaC)", "Using VM and cloud templates for rapid, consistent provisioning and deprovisioning (useful for sandbox testing). Security issue: attackers could modify the templates.", "Secure Coding and Development"], ["Static Testing", "Testing that examines code without running it, such as code review or manually scanning code.", "Software Testing"], ["Dynamic Testing", "Testing that observes an application's runtime behavior.", "Software Testing"], ["Fuzzing", "Providing an application with unexpected data to find crashes and vulnerabilities.", "Software Testing"]], "questions": [["Users complain that lately, when connecting to secured websites, they initially receive authentication and certificate errors. Host logs show that some user devices are infected with malware that modified entries in the DNS resolver cache. Which attack is most likely to have caused this behavior?", ["DNS poisoning", "URL hijacking", "ARP cache poisoning", "Ransomware"], 0, "Modified entries in the DNS resolver cache are DNS (cache) poisoning: names resolve to the wrong addresses, which is why certificate errors appear on secured sites.", ["", "URL hijacking (typosquatting) relies on users mistyping a name. It does not alter the DNS resolver cache on infected devices.", "ARP cache poisoning attacks the IP-to-MAC mapping on the local network, not the DNS resolver cache.", "Ransomware encrypts data for payment. The scenario describes modified DNS cache entries."]], ["Which technology uses digital signatures and certificates for DNS zones to help prevent DNS cache poisoning?", ["DNSSEC", "SNMPv3", "SRTP", "S/MIME"], 0, "DNSSEC adds authentication to DNS zones so responses can be verified, which counters cache poisoning.", ["", "SNMPv3 secures network device management, not DNS.", "SRTP secures real-time voice and video streams.", "S/MIME encrypts and signs e-mail messages."]], ["Which protocol and port does SSH use, and which secure file transfer protocol runs over the same port?", ["TCP 22; SFTP", "TCP 990; FTPS", "UDP 161; SNMP", "TCP 443; HTTPS"], 0, "SSH and SFTP both use TCP port 22. FTPS is a different protocol that uses TCP port 990.", ["", "TCP 990 is FTPS, which is FTP wrapped in SSL/TLS. SSH uses port 22.", "UDP 161 is SNMP, which is used for network device management.", "TCP 443 is HTTPS web traffic."]], ["Which version of SNMP should be used so management traffic is secured?", ["Version 3", "Version 1", "Version 2", "Any version, since all use UDP 161/162"], 0, "SNMP has versions 1, 2, and 3. Version 3 is the secure version, adding authentication and encryption. All versions use UDP 161/162, so the port does not indicate security.", ["", "Version 1 has no strong security.", "Version 2 does not add the authentication and encryption of version 3.", "Using the same ports says nothing about security. The version determines whether traffic is protected."]], ["Which port does LDAPS use instead of the standard LDAP port 389?", ["TCP 636", "TCP 443", "TCP 990", "UDP 5004"], 0, "LDAPS uses TCP port 636 and requires a server PKI certificate.", ["", "TCP 443 is HTTPS.", "TCP 990 is FTPS.", "UDP 5004 is SRTP."]], ["Which requirements are needed to secure a web application with HTTPS? Select all that apply.", ["A server PKI certificate", "TCP port 443", "TLS version 1.2 or higher", "A client PKI certificate on every user device"], [0, 1, 2], "HTTPS needs a server PKI certificate, uses TCP 443 instead of 80, and should use TLS 1.2 or higher. Client certificates are used for S/MIME, not required for HTTPS.", ["", "", "", "Client PKI certificates are used with S/MIME e-mail. HTTPS requires a certificate on the server."]], ["Which technique helps hide a web server's true IP address? Select all that apply.", ["Reverse proxying", "Load balancing", "Network Address Translation (NAT)", "Fuzzing"], [0, 1, 2], "Load balancing, reverse proxying, and NAT all conceal the true web server IP. Fuzzing is a software testing technique.", ["", "", "", "Fuzzing sends unexpected data to an application to find flaws. It does not hide an IP address."]], ["A user wants to both encrypt and digitally sign e-mail messages. Which technology should be used, and what does it require?", ["S/MIME with a client PKI certificate", "S/MIME with a server PKI certificate", "SMTP with domain reputation", "IMAP with TLS 1.0"], 0, "S/MIME encrypts and signs messages and requires a client PKI certificate.", ["", "A server certificate secures protocols like SMTP, POP, and IMAP connections. S/MIME requires a client certificate.", "Domain reputation influences whether other SMTP hosts accept mail. It does not encrypt or sign.", "IMAP only retrieves mail, and TLS 1.0 is not a recommended version."]], ["A user is logged into a banking website and is tricked into visiting a malicious site, which then sends requests to the bank using the user's existing session. Which attack is this?", ["Cross-site request forgery (CSRF)", "Server-side request forgery (SSRF)", "Cross-site scripting (XSS)", "SQL injection"], 0, "CSRF hijacks an authenticated session between a client and a server by abusing the user's existing session.", ["", "SSRF targets the web server, making it send HTTP requests to other services. Here the victim is the user's session.", "XSS injects malicious code into a vulnerable site that runs in visitors' browsers. The scenario uses a separate fake site.", "SQL injection sends malicious input to a database through a web app."]], ["An attacker causes a web server to make HTTP requests to other internal services. Which attack is this?", ["Server-side request forgery (SSRF)", "Cross-site request forgery (CSRF)", "DNS poisoning", "Fuzzing"], 0, "SSRF targets web servers and is designed to have the server make HTTP requests to other services.", ["", "CSRF targets users and their authenticated sessions, not the server's outbound requests.", "DNS poisoning corrupts name resolution.", "Fuzzing is a testing technique, not an attack type."]], ["A web app does not validate or sanitize user input, and an attacker injects JavaScript that runs in visitors' browsers. Which attack is this?", ["Cross-site scripting (XSS)", "Cross-site request forgery (CSRF)", "SSRF", "Domain hijacking"], 0, "XSS starts with an app that does not validate input; the attacker injects code, commonly JavaScript, that visitors unknowingly execute.", ["", "CSRF abuses an authenticated session rather than injecting code into the site.", "SSRF makes the server issue requests to other services.", "Domain hijacking takes over a domain registration or DNS records."]], ["Which are types of injection attacks? Select all that apply.", ["SQL injection", "LDAP injection", "XML injection", "Fuzzing"], [0, 1, 2], "Injection attacks include SQL, LDAP, and XML injection, all mitigated by sanitizing user input. Fuzzing is a testing method.", ["", "", "", "Fuzzing is a way to test software with unexpected data, not an attack type."]], ["Which is the primary mitigation for injection attacks and XSS?", ["Sanitize and validate all user input", "Use a longer TLS key", "Enable SNMPv3", "Switch from POP to IMAP"], 0, "All user input must be treated as untrusted and sanitized or validated before use.", ["", "TLS protects data in transit and does not stop malicious input being accepted.", "SNMPv3 secures device management, not web input.", "POP and IMAP are e-mail retrieval protocols, unrelated to web input."]], ["Which testing approach provides an application with unexpected data to find flaws?", ["Fuzzing", "Static testing", "Code signing", "Continuous delivery"], 0, "Fuzzing feeds unexpected data to an application to observe how it behaves.", ["", "Static testing examines code without running it, such as code review.", "Code signing verifies the source and integrity of code and is not a test.", "Continuous delivery automates releasing updates."]], ["What is the difference between static and dynamic testing?", ["Static reviews code without running it; dynamic observes runtime behavior", "Static observes runtime behavior; dynamic reviews code without running it", "Static only applies to cloud, dynamic only to on-premises", "There is no difference"], 0, "Static testing, such as code review, examines code without executing it. Dynamic testing observes the application's runtime behavior.", ["", "This reverses the two definitions.", "Both approaches apply to any environment.", "They differ in whether the code is executed."]], ["What is a key security concern with CI/CD pipelines and with infrastructure as code (IaC)?", ["Attackers could inject changes into updates or modify templates", "They require TCP port 636", "They cannot be used for sandbox testing", "They prevent code version control"], 0, "CI/CD automates code changes, so an attacker could inject malicious changes into the update. IaC templates could be modified by attackers.", ["", "TCP 636 is LDAPS and unrelated.", "IaC is actually useful for sandbox testing through rapid provisioning.", "CI/CD supports version control rather than preventing it."]], ["Which are secure coding best practices? Select all that apply.", ["Input validation", "Code signing", "Using trusted components and APIs", "Trusting all user input"], [0, 1, 2], "Secure coding includes input validation, secure cookies, HTTP headers, code signing, and trusted components and APIs. User input must be treated as untrusted.", ["", "", "", "All user input must be treated as untrusted, so trusting it is the opposite of secure coding."]]], "sections": ["DNS Security", "Secure Protocols and Ports", "Securing Web Applications", "E-mail Security", "Request Forgery and Cross-Site Attacks", "Input Handling and Injection", "Secure Coding and Development", "Software Testing"], "contrasts": ["FTPS = FTP + SSL/TLS on TCP 990; SFTP = file transfer over SSH on TCP 22.", "HTTPS and LDAPS need a server certificate; S/MIME needs a client certificate.", "CSRF abuses a user's logged-in session; SSRF makes the server issue requests to other services.", "XSS injects code that runs in visitors' browsers; injection sends malicious input to SQL, LDAP, or XML.", "Static testing does not run the code; dynamic testing observes it running; fuzzing feeds it unexpected data."]}];
+</script>
+<script>
+/* Security+ Study Tool — app logic */
+(function(){
+"use strict";
+
+const CH = window.__CHAPTERS__; // injected array
+
+// ---------- Shared state ----------
+const state = {
+  activeChapters: new Set(CH.map(c=>c.id)),
+  tab: "quiz",
+  quiz: null,
+  flash: { idx:0, order:[], flipped:false, known:new Set(), pool:[] },
+  learn: { queue:[], mastery:{}, current:null, pool:[] },
+  match: { pool:[], tiles:[], selected:[], matched:new Set(), startTime:null, timerId:null, best:null }
+};
+
+const PROGRESS_KEY = "secplus_study_progress_v1";
+function loadProgress(){
+  try{
+    const raw = localStorage.getItem(PROGRESS_KEY);
+    if(raw){
+      const p = JSON.parse(raw);
+      if(!p.quiz) p.quiz = { chapterStats:{}, missedQuestions:{} };
+      if(!p.quiz.chapterStats) p.quiz.chapterStats = {};
+      if(!p.quiz.missedQuestions) p.quiz.missedQuestions = {};
+      return p;
+    }
+  }catch(e){}
+  return { learnMastery:{}, matchBest:{}, flashKnown:[], quiz:{ chapterStats:{}, missedQuestions:{} } };
+}
+function saveProgress(){
+  try{
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
+  }catch(e){}
+}
+let progress = loadProgress();
+
+// ---------- Helpers ----------
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function pick(arr,n){ return shuffle(arr).slice(0,Math.min(n,arr.length)); }
+function el(html){
+  const t = document.createElement("template");
+  t.innerHTML = html.trim();
+  return t.content.firstElementChild;
+}
+function fmtTime(sec){
+  const m = Math.floor(sec/60), s = sec%60;
+  return m+":"+String(s).padStart(2,"0");
+}
+
+function allTerms(){
+  const out = [];
+  CH.forEach(c=>{
+    if(!state.activeChapters.has(c.id)) return;
+    c.terms.forEach((t,i)=> out.push({chId:c.id, chTitle:c.title, id:c.id+"-"+i, term:t[0], def:t[1], sec:t[2]||"Other"}));
+  });
+  return out;
+}
+function allAuthoredQuestions(){
+  const out = [];
+  CH.forEach(c=>{
+    if(!state.activeChapters.has(c.id)) return;
+    c.questions.forEach((q,i)=>{
+      const whyByText = {};
+      if(Array.isArray(q[4])) q[1].forEach((choice,j)=>{ if(q[4][j]) whyByText[choice] = q[4][j]; });
+      out.push({chId:c.id, chTitle:c.title, id:"q"+c.id+"-"+i, prompt:q[0], choices:q[1], answer:q[2], explain:q[3], whyByText});
+    });
+  });
+  return out;
+}
+
+// ---------- Missed-question tracking / weak-area analysis ----------
+function computeChapterAccuracy(){
+  const stats = progress.quiz.chapterStats;
+  return CH.map(c=>{
+    const s = stats[c.id] || {attempts:0, correct:0};
+    const pct = s.attempts>0 ? Math.round((s.correct/s.attempts)*100) : null;
+    return {chId:c.id, chTitle:c.title, attempts:s.attempts, correct:s.correct, pct};
+  });
+}
+function missedQuestionsForActiveChapters(){
+  return Object.values(progress.quiz.missedQuestions).filter(q=> state.activeChapters.has(q.chId));
+}
+function recordQuizResult(q, isCorrect){
+  const stats = progress.quiz.chapterStats;
+  if(!stats[q.chId]) stats[q.chId] = {attempts:0, correct:0};
+  stats[q.chId].attempts++;
+  if(isCorrect) stats[q.chId].correct++;
+
+  if(isCorrect){
+    // Getting it right (again) clears it from the missed list — considered mastered.
+    delete progress.quiz.missedQuestions[q.id];
+  } else {
+    const existing = progress.quiz.missedQuestions[q.id];
+    // Store a clean snapshot of the question (pre-shuffle-safe) so it can be replayed later.
+    progress.quiz.missedQuestions[q.id] = {
+      id: q.id, chId: q.chId, chTitle: q.chTitle, prompt: q.prompt,
+      choices: q.choices.slice(), answer: Array.isArray(q.answer) ? q.answer.slice() : q.answer,
+      explain: q.explain, mode: q.mode, choiceTerms: q.choiceTerms, choiceDefs: q.choiceDefs, whyByText: q.whyByText,
+      missCount: existing ? existing.missCount+1 : 1, lastMissed: Date.now()
+    };
+  }
+}
+function clearMissedHistory(){
+  // Only clears missed questions in the active chapter filter; chapter accuracy stats are untouched.
+  const active = state.activeChapters;
+  Object.keys(progress.quiz.missedQuestions).forEach(id=>{
+    if(active.has(progress.quiz.missedQuestions[id].chId)) delete progress.quiz.missedQuestions[id];
+  });
+  saveProgress();
+}
+
+// Generate a term<->definition MCQ pulled from the active term pool
+function genTermQuestion(term, pool){
+  const distractorPool = pick(pool.filter(p=>p.id!==term.id), 3);
+  const asksDef = Math.random() < 0.7; // mostly ask for definition
+  if(asksDef){
+    const options = [{text: term.def, term: term.term}, ...distractorPool.map(p=>({text: p.def, term: p.term}))];
+    const shuffled = shuffle(options);
+    const choices = shuffled.map(o=>o.text);
+    const choiceTerms = shuffled.map(o=>o.term);
+    return {
+      chId: term.chId, chTitle: term.chTitle, id: "gen-"+term.id+"-d",
+      prompt: `Which definition best matches "${term.term}"?`,
+      choices, choiceTerms, mode: "def",
+      answer: choices.indexOf(term.def),
+      explain: `${term.term}: ${term.def}`
+    };
+  } else {
+    const options = [{text: term.term, def: term.def}, ...distractorPool.map(p=>({text: p.term, def: p.def}))];
+    const shuffled = shuffle(options);
+    const choices = shuffled.map(o=>o.text);
+    const choiceDefs = shuffled.map(o=>o.def);
+    return {
+      chId: term.chId, chTitle: term.chTitle, id: "gen-"+term.id+"-t",
+      prompt: `Which term matches this definition: "${term.def}"`,
+      choices, choiceDefs, mode: "term",
+      answer: choices.indexOf(term.term),
+      explain: `${term.term}: ${term.def}`
+    };
+  }
+}
+
+// Explain why a specific chosen (incorrect) option doesn't fit, using whatever
+// context is available for the question type.
+function explainWrongChoice(q, chosenIdx){
+  if(chosenIdx===null || chosenIdx===undefined){
+    return "You didn't select an answer for this one before moving on.";
+  }
+  const chosenText = q.choices[chosenIdx];
+  if(q.mode==="def" && q.choiceTerms){
+    const chosenTerm = q.choiceTerms[chosenIdx];
+    const correctTerm = q.choiceTerms[q.answer];
+    return `That definition actually describes <strong>${chosenTerm}</strong>, not <strong>${correctTerm}</strong>. It's a real Security+ concept, just the wrong one for this prompt &mdash; the question asked specifically about ${correctTerm}.`;
+  }
+  if(q.mode==="term" && q.choiceDefs){
+    const chosenDef = q.choiceDefs[chosenIdx];
+    return `<strong>${chosenText}</strong> is a real term, but it actually means: &ldquo;${chosenDef}&rdquo; That's a different concept than the definition given in the question.`;
+  }
+  if(q.whyByText && q.whyByText[chosenText]){
+    return `<strong>${chosenText}</strong>: ${q.whyByText[chosenText]}`;
+  }
+  return `<strong>${chosenText}</strong> doesn't satisfy what the question stem is asking for. Re-read the scenario closely (watch for exact numbers, keywords, or conditions) and compare it against the reasoning below &mdash; that's usually where the distinction lives.`;
+}
+
+// Explain why a "select all that apply" submission doesn't match the full
+// correct set — names what was missed and what was wrongly included.
+function explainMultiWrong(q, chosenArr){
+  const chosen = Array.isArray(chosenArr) ? chosenArr : [];
+  const missed = q.answer.filter(idx=>!chosen.includes(idx)).map(idx=>q.choices[idx]);
+  const extra = chosen.filter(idx=>!q.answer.includes(idx)).map(idx=>q.choices[idx]);
+  const parts = [];
+  if(missed.length) parts.push(`You didn't select <strong>${missed.join(", ")}</strong>, which ${missed.length===1?"is":"are"} also part of the correct set.`);
+  if(extra.length) parts.push(`You selected <strong>${extra.join(", ")}</strong>, which ${extra.length===1?"doesn't":"don't"} belong &mdash; ${extra.length===1?"it isn't":"they aren't"} correct for this scenario.`);
+  if(parts.length===0) parts.push("Your selection didn't fully match the correct set below.");
+  return parts.join(" ");
+}
+
+// ---------- Tab switching ----------
+function setTab(tab){
+  state.tab = tab;
+  document.querySelectorAll(".tabbtn").forEach(b=> b.classList.toggle("active", b.dataset.tab===tab));
+  document.querySelectorAll(".panel").forEach(p=> p.classList.toggle("active", p.id==="panel-"+tab));
+  if(tab==="quiz") renderQuizSetup();
+  if(tab==="flash") renderFlashSetup();
+  if(tab==="learn") renderLearnSetup();
+  if(tab==="match") renderMatchSetup();
+  if(tab==="glossary") renderGlossary();
+}
+
+// ---------- Chapter filter UI ----------
+function renderChapterFilter(){
+  const wrap = document.getElementById("chapterFilter");
+  wrap.innerHTML = "";
+  const allBtn = el(`<button class="chip chipctl" id="chAll">All chapters</button>`);
+  const noneBtn = el(`<button class="chip chipctl" id="chNone">Clear</button>`);
+  allBtn.onclick = ()=>{ CH.forEach(c=>state.activeChapters.add(c.id)); refreshFilterUI(); };
+  noneBtn.onclick = ()=>{ state.activeChapters.clear(); refreshFilterUI(); };
+  wrap.appendChild(allBtn);
+  wrap.appendChild(noneBtn);
+  CH.forEach(c=>{
+    const chip = el(`<button class="chip" data-ch="${c.id}">Ch ${c.id}: ${c.title}</button>`);
+    chip.onclick = ()=>{
+      if(state.activeChapters.has(c.id)) state.activeChapters.delete(c.id);
+      else state.activeChapters.add(c.id);
+      refreshFilterUI();
+    };
+    wrap.appendChild(chip);
+  });
+  refreshFilterUI();
+}
+function refreshFilterUI(){
+  document.querySelectorAll("#chapterFilter .chip[data-ch]").forEach(chip=>{
+    const id = Number(chip.dataset.ch);
+    chip.classList.toggle("on", state.activeChapters.has(id));
+  });
+  const count = document.getElementById("filterCount");
+  if(count) count.textContent = state.activeChapters.size===0 ? "No chapters selected" : `${state.activeChapters.size} of ${CH.length} chapters active`;
+  // re-render whichever setup screen is showing
+  setTab(state.tab);
+}
+
+// ================= QUIZ / TEST MODE =================
+function renderQuizSetup(){
+  const panel = document.getElementById("panel-quiz");
+  const authored = allAuthoredQuestions().length;
+  const terms = allTerms().length;
+  const missedCount = missedQuestionsForActiveChapters().length;
+  const accRows = computeChapterAccuracy().filter(a=> state.activeChapters.has(a.chId) && a.attempts>0).sort((a,b)=>a.pct-b.pct);
+
+  let weakAreasHtml;
+  if(accRows.length===0){
+    weakAreasHtml = `<p class="muted small">Take a practice test to start tracking your accuracy by chapter.</p>`;
+  } else {
+    weakAreasHtml = accRows.map(a=>{
+      const cls = a.pct>=80 ? "good" : a.pct>=60 ? "ok" : "bad";
+      return `
+        <div class="accrow">
+          <div class="accrowhead">
+            <span>Ch ${a.chId}: ${a.chTitle}</span>
+            <span class="${cls}">${a.pct}%</span>
+          </div>
+          <div class="accbar"><div class="accbarfill ${cls}" style="width:${a.pct}%"></div></div>
+          <div class="muted small">${a.correct} of ${a.attempts} correct</div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  panel.innerHTML = `
+    <div class="card">
+      <h3>Your Weak Areas</h3>
+      ${weakAreasHtml}
+      <p class="muted small" style="margin-top:14px;">${missedCount} question${missedCount===1?"":"s"} currently missed and ready for review.</p>
+      <div class="setuprow">
+        <button class="btn primary" id="reviewMissedBtn" ${missedCount===0?"disabled":""}>Review missed questions (${missedCount})</button>
+        <button class="btn" id="clearMissedBtn" ${missedCount===0?"disabled":""}>Clear missed history</button>
+      </div>
+    </div>
+    <div class="card setupcard">
+      <h2>Practice Test</h2>
+      <p class="muted">A mix of exam-style scenario questions and randomly generated term/definition questions, pulled fresh from your selected chapters every time.</p>
+      <div class="setuprow">
+        <label>Number of questions
+          <select id="qCount">
+            <option value="10">10</option>
+            <option value="15" selected>15</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="9999">All available</option>
+          </select>
+        </label>
+        <label>Question mix
+          <select id="qMix">
+            <option value="both" selected>Exam-style + term/definition</option>
+            <option value="authored">Exam-style only</option>
+            <option value="generated">Term/definition only</option>
+          </select>
+        </label>
+      </div>
+      <p class="muted small">Available in this filter: ${authored} exam-style questions, ${terms} terms for generated questions.</p>
+      <button class="btn primary" id="startQuiz" ${state.activeChapters.size===0 ? "disabled":""}>Start Test</button>
+    </div>
+  `;
+  document.getElementById("startQuiz").onclick = startQuiz;
+  document.getElementById("reviewMissedBtn").onclick = startMissedReviewQuiz;
+  document.getElementById("clearMissedBtn").onclick = ()=>{ clearMissedHistory(); renderQuizSetup(); };
+}
+
+function startQuiz(){
+  const count = Number(document.getElementById("qCount").value);
+  const mix = document.getElementById("qMix").value;
+  const terms = allTerms();
+  const authored = allAuthoredQuestions();
+
+  let pool = [];
+  if(mix==="authored") pool = shuffle(authored);
+  else if(mix==="generated") pool = shuffle(terms).map(t=>genTermQuestion(t, terms));
+  else {
+    const half = Math.ceil(count/2);
+    const a = shuffle(authored).slice(0, Math.min(half, authored.length));
+    const remaining = count - a.length;
+    const g = shuffle(terms).slice(0, remaining).map(t=>genTermQuestion(t, terms));
+    pool = shuffle([...a, ...g]);
+    // top up if short
+    if(pool.length < count){
+      const need = count - pool.length;
+      const extraTerms = shuffle(terms).slice(0, need).map(t=>genTermQuestion(t, terms));
+      pool = shuffle([...pool, ...extraTerms]);
+    }
+  }
+  const questions = pool.slice(0, Math.min(count, pool.length));
+  // shuffle choice order per question while tracking correct answer(s)
+  questions.forEach(q=>{
+    if(Array.isArray(q.answer)){
+      const correctTexts = q.answer.map(idx=>q.choices[idx]);
+      const newChoices = shuffle(q.choices);
+      q.choices = newChoices;
+      q.answer = correctTexts.map(t=>newChoices.indexOf(t)).sort((a,b)=>a-b);
+    } else {
+      const correctText = q.choices[q.answer];
+      const newChoices = shuffle(q.choices);
+      q.choices = newChoices;
+      q.answer = newChoices.indexOf(correctText);
+    }
+  });
+
+  state.quiz = { questions, i:0, answers: new Array(questions.length).fill(null), submitted:false };
+  renderQuizQuestion();
+}
+
+function startMissedReviewQuiz(){
+  const missed = missedQuestionsForActiveChapters();
+  if(missed.length===0) return;
+  // Deep clone so shuffling doesn't mutate the stored snapshots before grading runs.
+  const questions = shuffle(missed).map(q=> JSON.parse(JSON.stringify(q)));
+  questions.forEach(q=>{
+    if(Array.isArray(q.answer)){
+      const correctTexts = q.answer.map(idx=>q.choices[idx]);
+      const newChoices = shuffle(q.choices);
+      q.choices = newChoices;
+      q.answer = correctTexts.map(t=>newChoices.indexOf(t)).sort((a,b)=>a-b);
+    } else {
+      const correctText = q.choices[q.answer];
+      const newChoices = shuffle(q.choices);
+      q.choices = newChoices;
+      q.answer = newChoices.indexOf(correctText);
+    }
+  });
+  state.quiz = { questions, i:0, answers: new Array(questions.length).fill(null), submitted:false, isMissedReview:true };
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion(){
+  const panel = document.getElementById("panel-quiz");
+  const qz = state.quiz;
+  if(!qz || qz.questions.length===0){
+    panel.innerHTML = `<div class="card"><p>No questions available for this chapter selection. Pick at least one chapter.</p><button class="btn" id="backSetup">Back</button></div>`;
+    document.getElementById("backSetup").onclick = renderQuizSetup;
+    return;
+  }
+  if(qz.submitted){ renderQuizResults(); return; }
+
+  const q = qz.questions[qz.i];
+  const multi = Array.isArray(q.answer);
+  const chosen = qz.answers[qz.i];
+  const chosenArr = multi ? (Array.isArray(chosen) ? chosen : []) : null;
+  panel.innerHTML = `
+    <div class="card">
+      <div class="quizhead">
+        <span class="tag">Ch ${q.chId}: ${q.chTitle}</span>
+        <span class="muted">${qz.isMissedReview ? "Missed Review &middot; " : ""}Question ${qz.i+1} of ${qz.questions.length}</span>
+      </div>
+      <div class="progressbar"><div class="progressfill" style="width:${((qz.i)/qz.questions.length)*100}%"></div></div>
+      <h3 class="qprompt">${q.prompt}</h3>
+      ${multi ? `<p class="muted small">Select every answer that applies, then click ${qz.i===qz.questions.length-1?"Submit Test":"Next"}.</p>` : ""}
+      <div class="choices" id="choices"></div>
+      <div class="quiznav">
+        <button class="btn" id="prevQ" ${qz.i===0?"disabled":""}>Previous</button>
+        <button class="btn primary" id="nextQ">${qz.i===qz.questions.length-1 ? "Submit Test" : "Next"}</button>
+      </div>
+    </div>
+  `;
+  const choicesWrap = document.getElementById("choices");
+  q.choices.forEach((c,idx)=>{
+    const isSelected = multi ? chosenArr.includes(idx) : chosen===idx;
+    const mark = multi ? `<span class="checkmark">${isSelected?"&#9745;":"&#9744;"}</span> ` : "";
+    const b = el(`<button class="choice ${isSelected?"selected":""}" data-idx="${idx}">${mark}${c}</button>`);
+    b.onclick = ()=>{
+      if(multi){
+        const arr = Array.isArray(qz.answers[qz.i]) ? qz.answers[qz.i].slice() : [];
+        const pos = arr.indexOf(idx);
+        if(pos>-1) arr.splice(pos,1); else arr.push(idx);
+        qz.answers[qz.i] = arr;
+      } else {
+        qz.answers[qz.i] = idx;
+      }
+      renderQuizQuestion();
+    };
+    choicesWrap.appendChild(b);
+  });
+  document.getElementById("prevQ").onclick = ()=>{ qz.i--; renderQuizQuestion(); };
+  document.getElementById("nextQ").onclick = ()=>{
+    if(qz.i < qz.questions.length-1){ qz.i++; renderQuizQuestion(); }
+    else { qz.submitted = true; renderQuizResults(); }
+  };
+}
+
+function arraysMatch(a,b){
+  if(a.length!==b.length) return false;
+  const sa = [...a].sort((x,y)=>x-y), sb=[...b].sort((x,y)=>x-y);
+  return sa.every((v,i)=>v===sb[i]);
+}
+
+function renderQuizResults(){
+  const panel = document.getElementById("panel-quiz");
+  const qz = state.quiz;
+  let correct = 0;
+  qz.questions.forEach((q,i)=>{
+    const chosen = qz.answers[i];
+    const multi = Array.isArray(q.answer);
+    const isCorrect = multi
+      ? arraysMatch(Array.isArray(chosen)?chosen:[], q.answer)
+      : chosen===q.answer;
+    if(isCorrect) correct++;
+    recordQuizResult(q, isCorrect);
+  });
+  saveProgress();
+  const pct = Math.round((correct/qz.questions.length)*100);
+  const passClass = pct>=80 ? "good" : pct>=60 ? "ok" : "bad";
+
+  let reviewHtml = qz.questions.map((q,i)=>{
+    const chosen = qz.answers[i];
+    const multi = Array.isArray(q.answer);
+    const chosenArr = multi ? (Array.isArray(chosen)?chosen:[]) : null;
+    const isCorrect = multi ? arraysMatch(chosenArr, q.answer) : chosen===q.answer;
+    const choicesHtml = q.choices.map((c,idx)=>{
+      let cls = "";
+      if(multi){
+        if(q.answer.includes(idx)) cls = "correct";
+        else if(chosenArr.includes(idx)) cls = "incorrect";
+      } else {
+        if(idx===q.answer) cls = "correct";
+        else if(idx===chosen && !isCorrect) cls = "incorrect";
+      }
+      return `<div class="reviewchoice ${cls}">${c}</div>`;
+    }).join("");
+
+    let explainBlock;
+    if(isCorrect){
+      explainBlock = `<div class="explainbox explainbox-good"><span class="explainlabel">Why it's correct:</span> ${q.explain}</div>`;
+    } else if(multi){
+      const yourAnswerText = chosenArr.length ? chosenArr.map(idx=>q.choices[idx]).join(", ") : "(nothing selected)";
+      const correctText = q.answer.map(idx=>q.choices[idx]).join(", ");
+      explainBlock = `<div class="explainbox explainbox-bad">
+           <span class="explainlabel">Your answer:</span> ${yourAnswerText}<br>
+           <span class="explainlabel">Why it's wrong:</span> ${explainMultiWrong(q, chosenArr)}
+         </div>
+         <div class="explainbox explainbox-good">
+           <span class="explainlabel">Correct answer:</span> ${correctText}<br>
+           <span class="explainlabel">Why it's correct:</span> ${q.explain}
+         </div>`;
+    } else {
+      explainBlock = `<div class="explainbox explainbox-bad">
+           <span class="explainlabel">Your answer:</span> ${chosen===null ? "(skipped)" : q.choices[chosen]}<br>
+           <span class="explainlabel">Why it's wrong:</span> ${explainWrongChoice(q, chosen)}
+         </div>
+         <div class="explainbox explainbox-good">
+           <span class="explainlabel">Correct answer:</span> ${q.choices[q.answer]}<br>
+           <span class="explainlabel">Why it's correct:</span> ${q.explain}
+         </div>`;
+    }
+    return `
+      <div class="reviewitem">
+        <div class="quizhead">
+          <span class="tag">Ch ${q.chId}</span>
+          <span class="${isCorrect?"good":"bad"}">${isCorrect?"Correct":(chosen===null||(multi&&chosenArr.length===0)?"Skipped":"Missed")}</span>
+        </div>
+        <p class="qprompt small">${q.prompt}</p>
+        <div class="choices">${choicesHtml}</div>
+        ${explainBlock}
+      </div>
+    `;
+  }).join("");
+
+  const missedCount = qz.questions.filter((q,i)=>{
+    const chosen = qz.answers[i];
+    return Array.isArray(q.answer)
+      ? !arraysMatch(Array.isArray(chosen)?chosen:[], q.answer)
+      : chosen!==q.answer;
+  }).length;
+  const missedBanner = missedCount>0
+    ? `<p class="muted small">You missed ${missedCount} question${missedCount===1?"":"s"} below &mdash; each one shows the correct answer and why it's correct.</p>`
+    : `<p class="muted small">Perfect score &mdash; review below still shows the reasoning for every question.</p>`;
+
+  panel.innerHTML = `
+    <div class="card">
+      <h2>Test Results</h2>
+      <div class="scoreBig ${passClass}">${correct} / ${qz.questions.length} (${pct}%)</div>
+      <div class="quiznav">
+        <button class="btn primary" id="retakeQuiz">New Test</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Review</h3>
+      ${missedBanner}
+      ${reviewHtml}
+    </div>
+  `;
+  document.getElementById("retakeQuiz").onclick = renderQuizSetup;
+}
+
+// ================= FLASHCARDS =================
+function renderFlashSetup(){
+  const panel = document.getElementById("panel-flash");
+  const terms = allTerms();
+  panel.innerHTML = `
+    <div class="card setupcard">
+      <h2>Flashcards</h2>
+      <p class="muted">Classic term/definition flip cards. Mark what you know, shuffle, and focus on what's left.</p>
+      <p class="muted small">${terms.length} cards available in this filter.</p>
+      <div class="setuprow">
+        <button class="btn primary" id="startFlash" ${terms.length===0?"disabled":""}>Start Flashcards</button>
+        <button class="btn" id="resetKnownFlash">Reset "known" cards</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("startFlash").onclick = startFlash;
+  document.getElementById("resetKnownFlash").onclick = ()=>{
+    progress.flashKnown = [];
+    saveProgress();
+    renderFlashSetup();
+  };
+}
+function startFlash(){
+  const terms = allTerms();
+  state.flash = { order: shuffle(terms), idx:0, flipped:false, known:new Set(progress.flashKnown) };
+  renderFlashCard();
+}
+function renderFlashCard(){
+  const panel = document.getElementById("panel-flash");
+  const f = state.flash;
+  const remaining = f.order.filter(t=>!f.known.has(t.id));
+  if(remaining.length===0){
+    panel.innerHTML = `<div class="card"><h2>All cards marked known!</h2><p class="muted">Nice work. Reset to study again.</p><button class="btn primary" id="backFlash">Back</button></div>`;
+    document.getElementById("backFlash").onclick = renderFlashSetup;
+    return;
+  }
+  if(f.idx >= remaining.length) f.idx = 0;
+  const card = remaining[f.idx];
+  panel.innerHTML = `
+    <div class="card">
+      <div class="quizhead">
+        <span class="tag">Ch ${card.chId}: ${card.chTitle}</span>
+        <span class="muted">${f.idx+1} of ${remaining.length} remaining &middot; ${f.known.size} known</span>
+      </div>
+      <div class="flashcard" id="flashcard">
+        <div class="flashface flashfront">${card.term}</div>
+        <div class="flashface flashback" style="display:none">${card.def}</div>
+      </div>
+      <p class="muted small center">Click the card to flip</p>
+      <div class="quiznav">
+        <button class="btn" id="prevFlash">Previous</button>
+        <button class="btn" id="knowFlash">Mark Known</button>
+        <button class="btn" id="shuffleFlash">Shuffle</button>
+        <button class="btn primary" id="nextFlash">Next</button>
+      </div>
+    </div>
+  `;
+  const cardEl = document.getElementById("flashcard");
+  cardEl.onclick = ()=>{
+    f.flipped = !f.flipped;
+    cardEl.querySelector(".flashfront").style.display = f.flipped ? "none":"flex";
+    cardEl.querySelector(".flashback").style.display = f.flipped ? "flex":"none";
+  };
+  document.getElementById("prevFlash").onclick = ()=>{ f.idx = (f.idx-1+remaining.length)%remaining.length; f.flipped=false; renderFlashCard(); };
+  document.getElementById("nextFlash").onclick = ()=>{ f.idx = (f.idx+1)%remaining.length; f.flipped=false; renderFlashCard(); };
+  document.getElementById("shuffleFlash").onclick = ()=>{ f.order = shuffle(f.order); f.idx=0; f.flipped=false; renderFlashCard(); };
+  document.getElementById("knowFlash").onclick = ()=>{
+    f.known.add(card.id);
+    progress.flashKnown = Array.from(f.known);
+    saveProgress();
+    f.flipped = false;
+    renderFlashCard();
+  };
+}
+
+// ================= LEARN MODE =================
+function renderLearnSetup(){
+  const panel = document.getElementById("panel-learn");
+  const terms = allTerms();
+  const mastered = terms.filter(t=> (progress.learnMastery[t.id]||0) >= 2).length;
+  panel.innerHTML = `
+    <div class="card setupcard">
+      <h2>Learn Mode</h2>
+      <p class="muted">Quizlet-style adaptive practice: answer multiple-choice prompts for each term. Get a term right twice in a row to retire it; miss one and it comes back into the rotation.</p>
+      <p class="muted small">${terms.length} terms in filter &middot; ${mastered} already mastered from past sessions.</p>
+      <div class="setuprow">
+        <button class="btn primary" id="startLearn" ${terms.length===0?"disabled":""}>Start Learning</button>
+        <button class="btn" id="resetLearn">Reset mastery</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("startLearn").onclick = startLearn;
+  document.getElementById("resetLearn").onclick = ()=>{
+    progress.learnMastery = {};
+    saveProgress();
+    renderLearnSetup();
+  };
+}
+function startLearn(){
+  const terms = allTerms();
+  state.learn = { pool: terms, queue: shuffle(terms.filter(t=>(progress.learnMastery[t.id]||0)<2)) };
+  nextLearnCard();
+}
+function nextLearnCard(){
+  const L = state.learn;
+  if(L.queue.length===0){
+    const panel = document.getElementById("panel-learn");
+    panel.innerHTML = `<div class="card"><h2>All terms mastered for this session!</h2><p class="muted">Every term in your filter has been answered correctly twice in a row.</p><button class="btn primary" id="backLearn">Back</button></div>`;
+    document.getElementById("backLearn").onclick = renderLearnSetup;
+    return;
+  }
+  L.current = L.queue[0];
+  renderLearnCard();
+}
+function renderLearnCard(){
+  const panel = document.getElementById("panel-learn");
+  const L = state.learn;
+  const term = L.current;
+  const masteryCount = progress.learnMastery[term.id] || 0;
+  const total = L.pool.length;
+  const remaining = L.queue.length;
+  const q = genTermQuestion(term, L.pool);
+
+  panel.innerHTML = `
+    <div class="card">
+      <div class="quizhead">
+        <span class="tag">Ch ${term.chId}: ${term.chTitle}</span>
+        <span class="muted">${remaining} left this round &middot; mastery ${masteryCount}/2</span>
+      </div>
+      <div class="progressbar"><div class="progressfill" style="width:${((total-remaining)/total)*100}%"></div></div>
+      <h3 class="qprompt">${q.prompt}</h3>
+      <div class="choices" id="learnChoices"></div>
+      <p class="muted small" id="learnFeedback"></p>
+    </div>
+  `;
+  const wrap = document.getElementById("learnChoices");
+  let answered = false;
+  q.choices.forEach((c,idx)=>{
+    const b = el(`<button class="choice" data-idx="${idx}">${c}</button>`);
+    b.onclick = ()=>{
+      if(answered) return;
+      answered = true;
+      const correct = idx===q.answer;
+      [...wrap.children].forEach((btn,i)=>{
+        if(i===q.answer) btn.classList.add("correct");
+        else if(i===idx) btn.classList.add("incorrect");
+      });
+      const feedbackEl = document.getElementById("learnFeedback");
+      feedbackEl.innerHTML = correct
+        ? `<span class="good">Correct!</span> ${q.explain}`
+        : `<span class="bad">Not quite.</span> ${explainWrongChoice(q, idx)}<br><br><strong>Correct answer:</strong> ${q.choices[q.answer]} &mdash; ${q.explain}`;
+
+      if(correct){
+        progress.learnMastery[term.id] = (progress.learnMastery[term.id]||0)+1;
+        L.queue.shift();
+        if(progress.learnMastery[term.id] < 2){
+          // put back later in queue for reinforcement
+          const pos = Math.min(L.queue.length, 3);
+          L.queue.splice(pos, 0, term);
+        }
+      } else {
+        progress.learnMastery[term.id] = 0;
+        L.queue.shift();
+        const pos = Math.min(L.queue.length, 2);
+        L.queue.splice(pos, 0, term);
+      }
+      saveProgress();
+      if(correct){
+        setTimeout(nextLearnCard, 1400);
+      } else {
+        // Missed: wait for explicit confirmation so there's time to read and take notes
+        const cont = el(`<button class="btn primary" id="learnContinue" style="margin-top:14px">I've reviewed this &mdash; continue</button>`);
+        cont.onclick = nextLearnCard;
+        feedbackEl.parentNode.appendChild(cont);
+        cont.focus();
+      }
+    };
+    wrap.appendChild(b);
+  });
+}
+
+// ================= GLOSSARY =================
+const glossaryUI = { open:null, veil:false };
+function renderGlossary(){
+  const panel = document.getElementById("panel-glossary");
+  const terms = allTerms();
+  panel.innerHTML = `
+    <div class="card">
+      <h2>Glossary</h2>
+      <p class="muted">Terms grouped by chapter and subsection, with quick contrasts for easily confused terms. Use "Quiz myself" to hide definitions and tap a row to reveal it.</p>
+      <input type="text" id="glossarySearch" class="glossarysearch" placeholder="Search terms, definitions, or subsections&hellip;">
+      <div class="gtools">
+        <button class="chip chipctl" id="gExpand">Expand all</button>
+        <button class="chip chipctl" id="gCollapse">Collapse all</button>
+        <button class="chip ${glossaryUI.veil?"on":""}" id="gVeil">Quiz myself (hide definitions)</button>
+      </div>
+      <p class="muted small" id="glossaryCount"></p>
+      <div id="glossaryList"></div>
+    </div>
+  `;
+  const chById = {}; CH.forEach(c=> chById[c.id]=c);
+  function renderList(filterText){
+    const list = document.getElementById("glossaryList");
+    const countEl = document.getElementById("glossaryCount");
+    const f = filterText.trim().toLowerCase();
+    const filtered = terms.filter(t=> !f || t.term.toLowerCase().includes(f) || t.def.toLowerCase().includes(f) || t.sec.toLowerCase().includes(f));
+    countEl.textContent = `${filtered.length} of ${terms.length} terms shown`;
+    if(filtered.length===0){
+      list.innerHTML = `<p class="muted small">No terms match that search.</p>`;
+      return;
+    }
+    const byChapter = {};
+    filtered.forEach(t=>{ (byChapter[t.chId] = byChapter[t.chId] || []).push(t); });
+    const chIds = Object.keys(byChapter).map(Number).sort((a,b)=>a-b);
+    const openDefault = glossaryUI.open===null ? (chIds.length<=2) : glossaryUI.open;
+    list.innerHTML = chIds.map(chId=>{
+      const ch = chById[chId];
+      const items = byChapter[chId];
+      const order = (ch.sections||[]).slice();
+      items.forEach(t=>{ if(!order.includes(t.sec)) order.push(t.sec); });
+      const secs = order.map(sn=>{
+        const rows = items.filter(t=>t.sec===sn);
+        if(!rows.length) return "";
+        return `<h4 class="gsec">${sn}<span class="gcount">${rows.length}</span></h4>` + rows.map(t=>`
+          <div class="glossaryrow">
+            <div class="glossaryterm">${t.term}</div>
+            <div class="glossarydef muted gdef ${glossaryUI.veil?"veiled":""}">${t.def}</div>
+          </div>`).join("");
+      }).join("");
+      const contrasts = (!f && ch.contrasts && ch.contrasts.length)
+        ? `<div class="gcontrast"><strong>Quick contrasts</strong><ul>${ch.contrasts.map(x=>`<li>${x}</li>`).join("")}</ul></div>` : "";
+      const nsec = new Set(items.map(t=>t.sec)).size;
+      const isOpen = f ? true : openDefault;
+      return `<details class="gch" ${isOpen?"open":""}><summary><span>Ch ${chId}: ${ch.title}</span><span class="gmeta">${items.length} terms &middot; ${nsec} subsections</span></summary><div class="gbody">${secs}${contrasts}</div></details>`;
+    }).join("");
+    list.querySelectorAll(".gdef").forEach(el=>{
+      el.onclick = ()=>{ if(glossaryUI.veil) el.classList.toggle("veiled"); };
+    });
+  }
+  renderList("");
+  document.getElementById("glossarySearch").oninput = (e)=> renderList(e.target.value);
+  document.getElementById("gExpand").onclick = ()=>{ glossaryUI.open=true; renderList(document.getElementById("glossarySearch").value); };
+  document.getElementById("gCollapse").onclick = ()=>{ glossaryUI.open=false; renderList(document.getElementById("glossarySearch").value); };
+  document.getElementById("gVeil").onclick = (e)=>{
+    glossaryUI.veil = !glossaryUI.veil;
+    e.currentTarget.classList.toggle("on", glossaryUI.veil);
+    renderList(document.getElementById("glossarySearch").value);
+  };
+}
+
+// ================= MATCH GAME =================
+function renderMatchSetup(){
+  const panel = document.getElementById("panel-match");
+  const terms = allTerms();
+  panel.innerHTML = `
+    <div class="card setupcard">
+      <h2>Match Game</h2>
+      <p class="muted">Quizlet-style speed match: click a term, then click its matching definition. Clear the board as fast as you can.</p>
+      <div class="setuprow">
+        <label>Pairs per round
+          <select id="matchSize">
+            <option value="6" selected>6</option>
+            <option value="8">8</option>
+            <option value="10">10</option>
+            <option value="12">12</option>
+          </select>
+        </label>
+      </div>
+      <p class="muted small">${terms.length} terms available in this filter.</p>
+      <button class="btn primary" id="startMatch" ${terms.length<4?"disabled":""}>Start Match</button>
+    </div>
+  `;
+  document.getElementById("startMatch").onclick = startMatch;
+}
+function startMatch(){
+  const size = Number(document.getElementById("matchSize").value);
+  const terms = allTerms();
+  const pool = pick(terms, Math.min(size, terms.length));
+  const tiles = [];
+  pool.forEach(t=>{
+    tiles.push({key:t.id, side:"term", text:t.term});
+    tiles.push({key:t.id, side:"def", text:t.def});
+  });
+  if(state.match.timerId) clearInterval(state.match.timerId);
+  state.match = { tiles: shuffle(tiles), selected:[], matched:new Set(), startTime: Date.now(), pairs: pool.length, timerId:null };
+  renderMatchBoard();
+  state.match.timerId = setInterval(()=>{
+    const timerEl = document.getElementById("matchTimer");
+    if(!timerEl){ clearInterval(state.match.timerId); return; }
+    const elapsed = Math.floor((Date.now()-state.match.startTime)/1000);
+    timerEl.textContent = fmtTime(elapsed);
+  }, 250);
+}
+function renderMatchBoard(){
+  const panel = document.getElementById("panel-match");
+  const M = state.match;
+  panel.innerHTML = `
+    <div class="card">
+      <div class="quizhead">
+        <span class="muted">Matched ${M.matched.size/2} of ${M.pairs} pairs</span>
+        <span class="tag" id="matchTimer">0:00</span>
+      </div>
+      <div class="matchgrid" id="matchGrid"></div>
+      <div class="quiznav"><button class="btn" id="backMatch">New Round</button></div>
+    </div>
+  `;
+  const grid = document.getElementById("matchGrid");
+  M.tiles.forEach((tile, idx)=>{
+    const matched = M.matched.has(idx);
+    const div = el(`<button class="matchtile ${matched?"matched":""} ${tile.side}" data-idx="${idx}">${tile.text}</button>`);
+    if(!matched){
+      div.onclick = ()=> onMatchTileClick(idx);
+    } else {
+      div.disabled = true;
+    }
+    grid.appendChild(div);
+  });
+  document.getElementById("backMatch").onclick = renderMatchSetup;
+}
+function onMatchTileClick(idx){
+  const M = state.match;
+  if(M.selected.includes(idx)) return;
+  if(M.selected.length===2) return;
+  M.selected.push(idx);
+  const grid = document.getElementById("matchGrid");
+  const tileEl = grid.querySelector(`[data-idx="${idx}"]`);
+  tileEl.classList.add("picked");
+
+  if(M.selected.length===2){
+    const [a,b] = M.selected;
+    const tileA = M.tiles[a], tileB = M.tiles[b];
+    const isMatch = tileA.key===tileB.key && tileA.side!==tileB.side;
+    if(isMatch){
+      M.matched.add(a); M.matched.add(b);
+      M.selected = [];
+      setTimeout(()=>{
+        if(M.matched.size===M.tiles.length){
+          const elapsed = Math.floor((Date.now()-M.startTime)/1000);
+          finishMatch(elapsed);
+        } else {
+          renderMatchBoard();
+        }
+      }, 250);
+    } else {
+      setTimeout(()=>{
+        M.selected = [];
+        renderMatchBoard();
+      }, 600);
+    }
+  }
+}
+function finishMatch(elapsed){
+  if(state.match.timerId){ clearInterval(state.match.timerId); state.match.timerId = null; }
+  const panel = document.getElementById("panel-match");
+  const key = state.match.pairs + "pairs";
+  const prevBest = progress.matchBest[key];
+  let bestMsg = "";
+  if(!prevBest || elapsed < prevBest){
+    progress.matchBest[key] = elapsed;
+    saveProgress();
+    bestMsg = prevBest ? `New best! Previous best was ${fmtTime(prevBest)}.` : "First run recorded as your best time.";
+  } else {
+    bestMsg = `Best for ${state.match.pairs} pairs: ${fmtTime(prevBest)}.`;
+  }
+  panel.innerHTML = `
+    <div class="card">
+      <h2>Board cleared!</h2>
+      <div class="scoreBig good">${fmtTime(elapsed)}</div>
+      <p class="muted">${bestMsg}</p>
+      <button class="btn primary" id="playAgainMatch">Play Again</button>
+    </div>
+  `;
+  document.getElementById("playAgainMatch").onclick = renderMatchSetup;
+}
+
+// ---------- Init ----------
+document.addEventListener("DOMContentLoaded", ()=>{
+  renderChapterFilter();
+  document.querySelectorAll(".tabbtn").forEach(b=>{
+    b.onclick = ()=> setTab(b.dataset.tab);
+  });
+  setTab("quiz");
+});
+})();
+
+</script>
+</body>
+</html>
